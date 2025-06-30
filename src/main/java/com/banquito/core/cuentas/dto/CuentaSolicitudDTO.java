@@ -11,10 +11,10 @@ import jakarta.validation.constraints.Size;
 public class CuentaSolicitudDTO {
 
     @NotNull(message = "El ID del tipo de cuenta es obligatorio")
-    private Integer idTipoCuenta;
+    private String idTipoCuenta;
 
     @NotNull(message = "El ID de la tasa de interés es obligatorio")
-    private Integer idTasaInteres;
+    private String idTasaInteres;
 
     @NotBlank(message = "El código de cuenta es obligatorio")
     @Size(max = 20, message = "El código de cuenta no puede exceder los 20 caracteres")

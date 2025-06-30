@@ -10,9 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface CuentasRepositorio extends JpaRepository<Cuentas, Integer> {
-    List<Cuentas> findByTipoCuentaId(Integer tipoCuentaId);
+    List<Cuentas> findByTipoCuentaId(String tipoCuentaId);
 
-    List<Cuentas> findByTasaInteresId(Integer tasaInteresId);
+    List<Cuentas> findByTasaInteresId(String tasaInteresId);
 
     Optional<Cuentas> findByCodigoCuenta(String codigoCuenta);
     List<Cuentas> findByNombreContainingIgnoreCase(String nombre);

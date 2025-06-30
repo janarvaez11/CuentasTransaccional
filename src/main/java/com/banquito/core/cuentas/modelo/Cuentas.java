@@ -16,11 +16,11 @@ public class Cuentas {
 
     /** Antes: @ManyToOne -> TiposCuentas */
     @Column(name = "id_tipo_cuenta", nullable = false)
-    private Integer tipoCuentaId;
+    private String tipoCuentaId;
 
     /** Antes: @ManyToOne -> TasasIntereses */
     @Column(name = "id_tasa_interes", nullable = false)
-    private Integer tasaInteresId;
+    private String tasaInteresId;
 
     @Column(name = "codigo_cuenta", nullable = false, length = 20)
     private String codigoCuenta;
@@ -60,19 +60,19 @@ public class Cuentas {
         this.id = id;
     }
 
-    public Integer getTipoCuentaId() {
+    public String getTipoCuentaId() {
         return tipoCuentaId;
     }
 
-    public void setTipoCuentaId(Integer tipoCuentaId) {
+    public void setTipoCuentaId(String tipoCuentaId) {
         this.tipoCuentaId = tipoCuentaId;
     }
 
-    public Integer getTasaInteresId() {
+    public String getTasaInteresId() {
         return tasaInteresId;
     }
 
-    public void setTasaInteresId(Integer tasaInteresId) {
+    public void setTasaInteresId(String tasaInteresId) {
         this.tasaInteresId = tasaInteresId;
     }
 

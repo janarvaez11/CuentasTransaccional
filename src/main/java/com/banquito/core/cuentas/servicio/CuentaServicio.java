@@ -32,8 +32,7 @@ public class CuentaServicio {
     public CuentaServicio(
             CuentasRepositorio cuentasRepo,
             TipoCuentaCliente tipoCuentaCliente,
-            TasaInteresCliente tasaInteresCliente
-    ) {
+            TasaInteresCliente tasaInteresCliente) {
         this.cuentasRepo = cuentasRepo;
         this.tipoCuentaCliente = tipoCuentaCliente;
         this.tasaInteresCliente = tasaInteresCliente;
@@ -61,7 +60,7 @@ public class CuentaServicio {
         // enriquecer con datos remotos
         TipoCuentaDTO tipoDto;
         try {
-            tipoDto = tipoCuentaCliente.obtenerPorId(guardada.getTipoCuentaId().toString());
+            tipoDto = tipoCuentaCliente.obtenerPorId(guardada.getTipoCuentaId());
         } catch (Exception e) {
             log.error("Error al obtener TipoCuenta remota para ID={}: {}", guardada.getTipoCuentaId(), e.getMessage());
             throw new CrearEntidadExcepcion("Cuentas",
@@ -87,7 +86,7 @@ public class CuentaServicio {
         // obtener datos remotos
         TipoCuentaDTO tipoDto;
         try {
-            tipoDto = tipoCuentaCliente.obtenerPorId(e.getTipoCuentaId().toString());
+            tipoDto = tipoCuentaCliente.obtenerPorId(e.getTipoCuentaId());
         } catch (Exception ex) {
             log.error("Error al obtener TipoCuenta remota para ID={}: {}", e.getTipoCuentaId(), ex.getMessage());
             throw new EntidadNoEncontradaExcepcion("Cuentas",
@@ -133,7 +132,7 @@ public class CuentaServicio {
         // enriquecer datos remotos
         TipoCuentaDTO tipoDto;
         try {
-            tipoDto = tipoCuentaCliente.obtenerPorId(updated.getTipoCuentaId().toString());
+            tipoDto = tipoCuentaCliente.obtenerPorId(updated.getTipoCuentaId());
         } catch (Exception ex) {
             log.error("Error al obtener TipoCuenta remota tras actualizar ID={}: {}", id, ex.getMessage());
             throw new ActualizarEntidadExcepcion("Cuentas",

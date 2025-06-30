@@ -27,18 +27,17 @@ public class TransaccionesServicio {
     private final CuentasClientesRepositorio cliRepo;
 
     public TransaccionesServicio(
-        TransaccionesRepositorio transRepo,
-        CuentasClientesRepositorio cliRepo
-    ) {
+            TransaccionesRepositorio transRepo,
+            CuentasClientesRepositorio cliRepo) {
         this.transRepo = transRepo;
-        this.cliRepo   = cliRepo;
+        this.cliRepo = cliRepo;
     }
 
     @Transactional(readOnly = true)
     public Transacciones buscarPorId(Integer id) {
         return transRepo.findById(id)
-            .orElseThrow(() -> new EntidadNoEncontradaExcepcion(
-                "Transacciones", "ID " + id + " no encontrada"));
+                .orElseThrow(() -> new EntidadNoEncontradaExcepcion(
+                        "Transacciones", "ID " + id + " no encontrada"));
     }
 
     @Transactional(readOnly = true)
@@ -48,19 +47,16 @@ public class TransaccionesServicio {
 
     @Transactional(readOnly = true)
     public List<Transacciones> listarPorCuentaYFechas(
-        Integer idCliente, Instant from, Instant to
-    ) {
+            Integer idCliente, Instant from, Instant to) {
         return transRepo
-            .findByIdCuentaCliente_IdAndFechaTransaccionBetweenOrderByFechaTransaccionDesc(
-                idCliente, from, to
-            );
+                .findByIdCuentaCliente_IdAndFechaTransaccionBetweenOrderByFechaTransaccionDesc(
+                        idCliente, from, to);
     }
 
     @Transactional
     public Transacciones procesar(TransaccionesSolicitudDTO dto) {
         Transacciones t = TransaccionesMapper.toEntity(dto);
         t.setFechaTransaccion(Instant.now());
-        t.setVersion(0L);
 
         switch (t.getTipoTransaccion()) {
             case DEPOSITO:
@@ -71,22 +67,25 @@ public class TransaccionesServicio {
                 return procesarTransferencia(t);
             default:
                 throw new CrearEntidadExcepcion(
-                    "Transacciones", "Tipo inválido: " + t.getTipoTransaccion()
-                );
+                        "Transacciones", "Tipo inválido: " + t.getTipoTransaccion());
         }
     }
 
     private Transacciones procesarDeposito(Transacciones t) {
         if (t.getTipoTransaccion() != TipoTransaccionEnum.DEPOSITO) {
             throw new CrearEntidadExcepcion(
-                "Transacciones", "No es DEPÓSITO"
-            );
+                    "Transacciones", "No es DEPÓSITO");
         }
         CuentasClientes cc = cliRepo.findById(
-            t.getIdCuentaCliente().getId()
-        ).orElseThrow(() -> new EntidadNoEncontradaExcepcion(
-            "CuentasClientes", "ID " + t.getIdCuentaCliente().getId() + " no encontrada"
-        ));
+                t.getIdCuentaCliente().getId()).orElseThrow(
+                        () -> new EntidadNoEncontradaExcepcion(
+                                "CuentasClientes", "ID " + t.getIdCuentaCliente().getId() + " no encontrada"));
+
+        t.setIdCuentaCliente(cc);
+
+        if (cc.getVersion() == null) {
+            cc.setVersion(0L);
+        }
         validarActiva(cc);
         cc.setSaldoDisponible(cc.getSaldoDisponible().add(t.getMonto()));
         cc.setSaldoContable(cc.getSaldoContable().add(t.getMonto()));
@@ -99,24 +98,26 @@ public class TransaccionesServicio {
     private Transacciones procesarRetiro(Transacciones t) {
         if (t.getTipoTransaccion() != TipoTransaccionEnum.RETIRO) {
             throw new CrearEntidadExcepcion(
-                "Transacciones", "No es RETIRO"
-            );
+                    "Transacciones", "No es RETIRO");
         }
         CuentasClientes cc = cliRepo.findById(
-            t.getIdCuentaCliente().getId()
-        ).orElseThrow(() -> new EntidadNoEncontradaExcepcion(
-            "CuentasClientes", "ID " + t.getIdCuentaCliente().getId() + " no encontrada"
-        ));
+                t.getIdCuentaCliente().getId()).orElseThrow(
+                        () -> new EntidadNoEncontradaExcepcion(
+                                "CuentasClientes", "ID " + t.getIdCuentaCliente().getId() + " no encontrada"));
+        t.setIdCuentaCliente(cc);
+
+        if (cc.getVersion() == null) {
+            cc.setVersion(0L);
+        }
         validarActiva(cc);
         if (cc.getSaldoDisponible().compareTo(t.getMonto()) < 0) {
             throw new CrearEntidadExcepcion(
-                "Transacciones", "Saldo insuficiente"
-            );
+                    "Transacciones", "Saldo insuficiente");
         }
         cc.setSaldoDisponible(cc.getSaldoDisponible().subtract(t.getMonto()));
         cc.setSaldoContable(cc.getSaldoContable().subtract(t.getMonto()));
         cliRepo.save(cc);
-
+        t.setVersion(0L);
         t.setEstado(EstadoTransaccionesEnum.PROCESADO);
         return transRepo.save(t);
     }
@@ -125,28 +126,31 @@ public class TransaccionesServicio {
         // origen
         validarTransferencia(t);
         CuentasClientes origen = cliRepo.findById(
-            t.getIdCuentaCliente().getId()
-        ).orElseThrow(() -> new EntidadNoEncontradaExcepcion(
-            "CuentasClientes", "Origen ID " + t.getIdCuentaCliente().getId() + " no encontrada"
-        ));
+                t.getIdCuentaCliente().getId()).orElseThrow(
+                        () -> new EntidadNoEncontradaExcepcion(
+                                "CuentasClientes", "Origen ID " + t.getIdCuentaCliente().getId() + " no encontrada"));
         CuentasClientes destino = cliRepo.findById(
-            t.getIdCuentaClienteDestino()
-        ).orElseThrow(() -> new EntidadNoEncontradaExcepcion(
-            "CuentasClientes", "Destino ID " + t.getIdCuentaClienteDestino() + " no encontrada"
-        ));
+                t.getIdCuentaClienteDestino()).orElseThrow(
+                        () -> new EntidadNoEncontradaExcepcion(
+                                "CuentasClientes", "Destino ID " + t.getIdCuentaClienteDestino() + " no encontrada"));
+
+        if (origen.getVersion() == null)
+            origen.setVersion(0L);
+        if (destino.getVersion() == null)
+            destino.setVersion(0L);
+
         validarActiva(origen);
         validarActiva(destino);
         if (origen.getSaldoDisponible().compareTo(t.getMonto()) < 0) {
             throw new CrearEntidadExcepcion(
-                "Transacciones", "Saldo insuficiente en origen"
-            );
+                    "Transacciones", "Saldo insuficiente en origen");
         }
         // débito origen
         Transacciones debito = cloneForTransfer(origen, t.getMonto().negate(),
-            "Transf saliente: " + t.getDescripcion());
+                "Transf saliente: " + t.getDescripcion());
         // crédito destino
         Transacciones credito = cloneForTransfer(destino, t.getMonto(),
-            "Transf entrante: " + t.getDescripcion());
+                "Transf entrante: " + t.getDescripcion());
 
         // aplicar cambios saldos
         origen.setSaldoDisponible(origen.getSaldoDisponible().subtract(t.getMonto()));
@@ -163,27 +167,23 @@ public class TransaccionesServicio {
     private void validarActiva(CuentasClientes cc) {
         if (cc.getEstado() != EstadoCuentaClienteEnum.ACTIVO) {
             throw new CrearEntidadExcepcion(
-                "Transacciones", "Cuenta inactiva"
-            );
+                    "Transacciones", "Cuenta inactiva");
         }
     }
 
     private void validarTransferencia(Transacciones t) {
         if (t.getIdCuentaCliente().getId().equals(t.getIdCuentaClienteDestino())) {
             throw new CrearEntidadExcepcion(
-                "Transacciones", "Mismo origen y destino"
-            );
+                    "Transacciones", "Mismo origen y destino");
         }
         if (t.getTipoTransaccion() != TipoTransaccionEnum.TRANSFERENCIA) {
             throw new CrearEntidadExcepcion(
-                "Transacciones", "No es TRANSFERENCIA"
-            );
+                    "Transacciones", "No es TRANSFERENCIA");
         }
     }
 
     private Transacciones cloneForTransfer(
-        CuentasClientes cc, BigDecimal monto, String desc
-    ) {
+            CuentasClientes cc, BigDecimal monto, String desc) {
         Transacciones tx = new Transacciones();
         tx.setIdCuentaCliente(cc);
         tx.setIdCuentaClienteDestino(cc.getId()); // no se usa en saldos, pero llenamos
@@ -192,7 +192,7 @@ public class TransaccionesServicio {
         tx.setDescripcion(desc);
         tx.setFechaTransaccion(Instant.now());
         tx.setEstado(EstadoTransaccionesEnum.PROCESADO);
-        tx.setVersion(0L);
+        tx.setVersion(0L); // nuevo registro, versión inicial
         return tx;
     }
 }

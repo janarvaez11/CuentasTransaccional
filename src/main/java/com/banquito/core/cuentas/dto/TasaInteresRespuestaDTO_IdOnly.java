@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @Builder
 public class TasaInteresRespuestaDTO_IdOnly {
-    private Integer id;
+    private String id;
 }
