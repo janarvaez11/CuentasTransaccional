@@ -1,4 +1,3 @@
-// TasaInteresCliente.java
 package com.banquito.core.cuentas.cliente;
 
 import com.banquito.core.cuentas.dto.TasaInteresRespuestaDTO_IdOnly;
