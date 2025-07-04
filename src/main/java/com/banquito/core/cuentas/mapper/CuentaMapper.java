@@ -1,4 +1,3 @@
-// src/main/java/com/banquito/core/cuentas/mapper/CuentaMapper.java
 package com.banquito.core.cuentas.mapper;
 
 import com.banquito.core.cuentas.dto.CuentaRespuestaDTO;

@@ -1,4 +1,3 @@
-// src/main/java/com/banquito/core/cuentas/dto/CuentaRespuestaDTO.java
 package com.banquito.core.cuentas.dto;
 
 import lombok.Builder;
