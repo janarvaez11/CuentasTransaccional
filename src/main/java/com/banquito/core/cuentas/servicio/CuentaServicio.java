@@ -1,7 +1,7 @@
 package com.banquito.core.cuentas.servicio;
 
 import com.banquito.core.cuentas.cliente.TipoCuentaCliente;
-import com.banquito.core.cuentas.cliente.TasaInteresCliente;
+
 import com.banquito.core.cuentas.dto.CuentaRespuestaDTO;
 import com.banquito.core.cuentas.dto.CuentaSolicitudDTO;
 import com.banquito.core.cuentas.dto.TipoCuentaDTO;
@@ -27,15 +27,12 @@ public class CuentaServicio {
 
     private final CuentasRepositorio cuentasRepo;
     private final TipoCuentaCliente tipoCuentaCliente;
-    private final TasaInteresCliente tasaInteresCliente;
 
     public CuentaServicio(
             CuentasRepositorio cuentasRepo,
-            TipoCuentaCliente tipoCuentaCliente,
-            TasaInteresCliente tasaInteresCliente) {
+            TipoCuentaCliente tipoCuentaCliente) {
         this.cuentasRepo = cuentasRepo;
         this.tipoCuentaCliente = tipoCuentaCliente;
-        this.tasaInteresCliente = tasaInteresCliente;
     }
 
     @Transactional
