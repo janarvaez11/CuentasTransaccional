@@ -8,7 +8,7 @@ import java.time.Instant;
 import com.banquito.core.cuentas.enums.EstadoCuentaClienteEnum;
 
 @Entity
-@Table(name = "cuentas_clientes", schema = "cuentastransaccional")
+@Table(name = "cuentas_clientes", schema = "account")
 public class CuentasClientes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

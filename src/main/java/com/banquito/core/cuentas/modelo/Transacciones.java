@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "transacciones", schema = "cuentastransaccional")
+@Table(name = "transacciones", schema = "account")
 public class Transacciones {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
