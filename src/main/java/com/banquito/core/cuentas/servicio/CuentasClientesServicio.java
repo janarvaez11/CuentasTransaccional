@@ -46,7 +46,7 @@ public class CuentasClientesServicio {
         return cuentaCliente;
     }
 
-    public CuentasClientes buscarPorIdClienteAndNumeroCuenta(Integer idCliente, String numeroCuenta) {
+    public CuentasClientes buscarPorIdClienteAndNumeroCuenta(String idCliente, String numeroCuenta) {
         log.debug("Iniciando búsqueda de CuentasClientes por ID Cliente: {} y Número de Cuenta: {}", idCliente, numeroCuenta);
         CuentasClientes cuentaCliente = cuentasClientesRepositorio.findByIdClienteAndNumeroCuenta(idCliente, numeroCuenta)
                 .orElseThrow(() -> new EntidadNoEncontradaExcepcion("CuentasClientes", "Cuenta Cliente no encontrada para Cliente ID " + idCliente + " y Número de Cuenta " + numeroCuenta + "."));

@@ -7,6 +7,6 @@ import lombok.Data;
 @Builder
 public class CuentasClientesRespuestaDTO_Min2 {
     private Integer id;
-    private Integer idCliente;
+    private String idCliente;
     private String numeroCuenta;
 }

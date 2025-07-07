@@ -57,7 +57,7 @@ public class CuentasClientesControlador {
 
     @GetMapping("/cliente/{idCliente}/numero-cuenta/{numeroCuenta}")
     public ResponseEntity<CuentasClientesRespuestaDTO> obtenerCuentasClientesPorIdClienteYNumeroCuenta(
-            @PathVariable Integer idCliente,
+            @PathVariable String idCliente,
             @PathVariable String numeroCuenta) {
         log.info("Recibida solicitud para obtener CuentasClientes por ID Cliente: {} y Número de Cuenta: {}", idCliente, numeroCuenta);
         try {

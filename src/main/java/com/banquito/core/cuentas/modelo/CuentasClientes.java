@@ -20,7 +20,7 @@ public class CuentasClientes {
     private Cuentas idCuenta;
 
     @Column(name = "id_cliente", nullable = false)
-    private Integer idCliente; // Assuming this is an Integer ID for Clientes, not a full entity reference
+    private String idCliente; // Assuming this is an Integer ID for Clientes, not a full entity reference
 
     @Column(name = "numero_cuenta", nullable = false, length = 10)
     private String numeroCuenta;
@@ -65,11 +65,11 @@ public class CuentasClientes {
         this.idCuenta = idCuenta;
     }
 
-    public Integer getIdCliente() {
+    public String getIdCliente() {
         return idCliente;
     }
 
-    public void setIdCliente(Integer idCliente) {
+    public void setIdCliente(String idCliente) {
         this.idCliente = idCliente;
     }
 

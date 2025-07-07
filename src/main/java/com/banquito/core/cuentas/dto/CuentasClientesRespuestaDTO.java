@@ -12,7 +12,7 @@ import java.time.Instant;
 public class CuentasClientesRespuestaDTO {
     private Integer id;
     private CuentaRespuestaDTO_Min2 idCuenta; // ID, código y nombre de la cuenta
-    private Integer idCliente; // Solo el ID del cliente
+    private String idCliente; // Solo el ID del cliente
     private String numeroCuenta;
     private BigDecimal saldoDisponible;
     private BigDecimal saldoContable;

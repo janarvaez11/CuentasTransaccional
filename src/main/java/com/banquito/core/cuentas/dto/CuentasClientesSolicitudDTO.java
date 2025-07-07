@@ -15,7 +15,7 @@ public class CuentasClientesSolicitudDTO {
     private Integer idCuenta;
 
     @NotNull(message = "El ID del cliente es obligatorio")
-    private Integer idCliente;
+    private String idCliente;
 
     @NotBlank(message = "El número de cuenta es obligatorio")
     @Size(max = 10, message = "El número de cuenta no puede exceder los 10 caracteres")
