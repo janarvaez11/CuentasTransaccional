@@ -1,4 +1,4 @@
-package com.banquito.core.cuentas.dto;
+package com.banquito.core.cuentas.dto.external;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DatosClienteDTO {
+public class ClienteDTO {
 
     private String id; // ID del cliente como string (ej: "1753898188")
     private String numeroIdentificacion;
