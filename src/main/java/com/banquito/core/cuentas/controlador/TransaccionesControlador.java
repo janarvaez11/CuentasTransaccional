@@ -1,9 +1,9 @@
 package com.banquito.core.cuentas.controlador;
 
 import com.banquito.core.cuentas.dto.TransaccionesSolicitudDTO;
+import com.banquito.core.cuentas.dto.DesembolsoRespuestaDTO;
+import com.banquito.core.cuentas.dto.DesembolsoSolicitudDTO;
 import com.banquito.core.cuentas.dto.TransaccionesRespuestaDTO;
-import com.banquito.core.cuentas.excepcion.CrearEntidadExcepcion;
-import com.banquito.core.cuentas.excepcion.EntidadNoEncontradaExcepcion;
 import com.banquito.core.cuentas.mapper.TransaccionesMapper;
 import com.banquito.core.cuentas.modelo.Transacciones;
 import com.banquito.core.cuentas.servicio.TransaccionesServicio;
@@ -22,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -128,4 +127,22 @@ public class TransaccionesControlador {
                 Transacciones t = servicio.procesar(dto);
                 return ResponseEntity.status(HttpStatus.CREATED).body(TransaccionesMapper.toDto(t));
         }
+
+
+        
+        @Operation(summary = "Desembolsar préstamo", description = "Ejecuta retiro de la cuenta pool, depósito al cliente y transferencia a originación")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "201", description = "Desembolso procesado exitosamente", content = @Content(schema = @Schema(implementation = DesembolsoRespuestaDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+                        @ApiResponse(responseCode = "404", description = "Alguna de las cuentas no fue encontrada"),
+                        @ApiResponse(responseCode = "409", description = "Fondos insuficientes o cuenta inactiva")
+        })
+        @PostMapping("/desembolso")
+        public ResponseEntity<DesembolsoRespuestaDTO> desembolso(
+                        @Valid @RequestBody DesembolsoSolicitudDTO dto) {
+                log.info("POST /api/v1/transacciones/desembolso → {}", dto);
+                DesembolsoRespuestaDTO resultado = servicio.procesarDesembolso(dto);
+                return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+        }
+
 }

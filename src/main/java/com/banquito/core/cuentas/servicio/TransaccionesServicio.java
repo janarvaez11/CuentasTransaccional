@@ -1,5 +1,8 @@
 package com.banquito.core.cuentas.servicio;
 
+import com.banquito.core.cuentas.dto.DesembolsoRespuestaDTO;
+import com.banquito.core.cuentas.dto.DesembolsoSolicitudDTO;
+import com.banquito.core.cuentas.dto.TransaccionesRespuestaDTO;
 import com.banquito.core.cuentas.dto.TransaccionesSolicitudDTO;
 import com.banquito.core.cuentas.enums.EstadoCuentaClienteEnum;
 import com.banquito.core.cuentas.enums.EstadoTransaccionesEnum;
@@ -15,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.beans.factory.annotation.Value;
+
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -25,12 +31,15 @@ public class TransaccionesServicio {
 
     private final TransaccionesRepositorio transRepo;
     private final CuentasClientesRepositorio cliRepo;
+    private final Integer poolAccountId;
 
     public TransaccionesServicio(
             TransaccionesRepositorio transRepo,
-            CuentasClientesRepositorio cliRepo) {
+            CuentasClientesRepositorio cliRepo,
+            @Value("${cuentas.desembolso.pool-account-id}") Integer poolAccountId) {
         this.transRepo = transRepo;
         this.cliRepo = cliRepo;
+        this.poolAccountId  = poolAccountId;
     }
 
     @Transactional(readOnly = true)
@@ -195,4 +204,68 @@ public class TransaccionesServicio {
         tx.setVersion(0L); // nuevo registro, versión inicial
         return tx;
     }
+
+
+    //Proceos de desembolso
+
+@Transactional
+public DesembolsoRespuestaDTO procesarDesembolso(DesembolsoSolicitudDTO dto) {
+    // 1) Cargo y valido las 3 cuentas
+    CuentasClientes pool   = getCuenta(poolAccountId);
+    CuentasClientes cliente= getCuenta(dto.getIdCuentaCliente());
+    CuentasClientes origin = getCuenta(dto.getIdCuentaOriginacion());
+
+    validarActiva(pool);
+    validarActiva(cliente);
+    validarActiva(origin);
+
+    // 2) Genero DTOs de cada paso
+    TransaccionesSolicitudDTO retiroPoolDto = TransaccionesSolicitudDTO.builder()
+        .idCuentaClienteOrigen(pool.getId())
+        .tipoTransaccion(TipoTransaccionEnum.RETIRO)
+        .monto(dto.getMonto())
+        .descripcion("Desembolso a cliente " + cliente.getId())
+        .build();
+
+    TransaccionesSolicitudDTO depositoClienteDto = TransaccionesSolicitudDTO.builder()
+        .idCuentaClienteOrigen(cliente.getId())
+        .tipoTransaccion(TipoTransaccionEnum.DEPOSITO)
+        .monto(dto.getMonto())
+        .descripcion(dto.getDescripcion())
+        .build();
+
+    TransaccionesSolicitudDTO transferenciaOriginDto = TransaccionesSolicitudDTO.builder()
+        .idCuentaClienteOrigen(cliente.getId())
+        .idCuentaClienteDestino(origin.getId())
+        .tipoTransaccion(TipoTransaccionEnum.TRANSFERENCIA)
+        .monto(dto.getMonto())
+        .descripcion("Pago concesionaria préstamo")
+        .build();
+
+    // 3) Invoco tu método procesar(...) directamente
+    Transacciones retiroPoolTx      = procesar(retiroPoolDto);
+    Transacciones depositoClienteTx = procesar(depositoClienteDto);
+    Transacciones transferOriginTx  = procesar(transferenciaOriginDto);
+
+    log.info("Desembolso completo: poolTx={}, depClienteTx={}, transfOriginTx={}",
+        retiroPoolTx.getId(),
+        depositoClienteTx.getId(),
+        transferOriginTx.getId());
+
+    return DesembolsoRespuestaDTO.builder()
+        .retiroPool(TransaccionesMapper.toDto(retiroPoolTx))
+        .depositoCliente(TransaccionesMapper.toDto(depositoClienteTx))
+        .transferenciaOrigen(TransaccionesMapper.toDto(transferOriginTx))
+        .build();
+}
+
+private CuentasClientes getCuenta(Integer id) {
+    return cliRepo.findById(id)
+      .orElseThrow(() -> new EntidadNoEncontradaExcepcion(
+         "CuentasClientes", "ID " + id + " no encontrada"));
+}
+
+
+
+
 }
