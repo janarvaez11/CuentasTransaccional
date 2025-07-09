@@ -11,5 +11,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 )
 public interface TasaInteresCliente {
     @GetMapping("/api/v1/tasas-intereses/{id}")
-    TasaInteresRespuestaDTO_IdOnly obtenerPorId(@PathVariable("id") Integer id);
+    TasaInteresRespuestaDTO_IdOnly obtenerPorId(@PathVariable("id") String id);
 }

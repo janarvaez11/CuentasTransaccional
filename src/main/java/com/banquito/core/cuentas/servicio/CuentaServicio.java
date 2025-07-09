@@ -4,6 +4,7 @@ import com.banquito.core.cuentas.cliente.TipoCuentaCliente;
 
 import com.banquito.core.cuentas.dto.CuentaRespuestaDTO;
 import com.banquito.core.cuentas.dto.CuentaSolicitudDTO;
+import com.banquito.core.cuentas.cliente.TasaInteresCliente;
 import com.banquito.core.cuentas.dto.TipoCuentaDTO;
 import com.banquito.core.cuentas.dto.TasaInteresRespuestaDTO_IdOnly;
 import com.banquito.core.cuentas.excepcion.ActualizarEntidadExcepcion;
@@ -13,6 +14,9 @@ import com.banquito.core.cuentas.excepcion.EntidadNoEncontradaExcepcion;
 import com.banquito.core.cuentas.mapper.CuentaMapper;
 import com.banquito.core.cuentas.modelo.Cuentas;
 import com.banquito.core.cuentas.repositorio.CuentasRepositorio;
+
+import feign.FeignException;
+
 import com.banquito.core.cuentas.enums.EstadoGeneralCuentasEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,16 +31,32 @@ public class CuentaServicio {
 
     private final CuentasRepositorio cuentasRepo;
     private final TipoCuentaCliente tipoCuentaCliente;
+    private final TasaInteresCliente tasaInteresCliente;
 
     public CuentaServicio(
             CuentasRepositorio cuentasRepo,
-            TipoCuentaCliente tipoCuentaCliente) {
+            TipoCuentaCliente tipoCuentaCliente,
+            TasaInteresCliente tasaInteresCliente) {
         this.cuentasRepo = cuentasRepo;
         this.tipoCuentaCliente = tipoCuentaCliente;
+        this.tasaInteresCliente = tasaInteresCliente;
     }
 
     @Transactional
     public CuentaRespuestaDTO crear(CuentaSolicitudDTO dto) {
+
+        // 1) Validar unicidad de código y nombre
+        if (cuentasRepo.existsByCodigoCuenta(dto.getCodigoCuenta())) {
+            log.warn("Intento de crear cuenta con código duplicado={}", dto.getCodigoCuenta());
+            throw new CrearEntidadExcepcion("Cuentas",
+                    "Ya existe una cuenta con código '" + dto.getCodigoCuenta() + "'");
+        }
+        if (cuentasRepo.existsByNombre(dto.getNombre())) {
+            log.warn("Intento de crear cuenta con nombre duplicado={}", dto.getNombre());
+            throw new CrearEntidadExcepcion("Cuentas",
+                    "Ya existe una cuenta con nombre '" + dto.getNombre() + "'");
+        }
+
         Cuentas entity = CuentaMapper.toEntity(dto);
         Instant ahora = Instant.now();
         entity.setFechaCreacion(ahora);
@@ -54,60 +74,77 @@ public class CuentaServicio {
                     "Error al guardar nueva cuenta: " + e.getMessage());
         }
 
-        // enriquecer con datos remotos
+        // 3) Validar existencia remota de Tipo de Cuenta
         TipoCuentaDTO tipoDto;
         try {
-            tipoDto = tipoCuentaCliente.obtenerPorId(guardada.getTipoCuentaId());
-        } catch (Exception e) {
-            log.error("Error al obtener TipoCuenta remota para ID={}: {}", guardada.getTipoCuentaId(), e.getMessage());
+            tipoDto = tipoCuentaCliente.obtenerPorId(dto.getIdTipoCuenta());
+        } catch (FeignException.NotFound nf) {
+            log.error("TipoCuenta no existe ID={}", dto.getIdTipoCuenta());
             throw new CrearEntidadExcepcion("Cuentas",
-                    "Cuenta creada pero fallo al recuperar tipoCuenta: " + e.getMessage());
+                    "Cuenta creada pero fallo al recuperar TipoCuenta: ID no encontrado");
+        } catch (Exception ex) {
+            log.error("Error al obtener TipoCuenta ID={}: {}", dto.getIdTipoCuenta(), ex.getMessage());
+            throw new CrearEntidadExcepcion("Cuentas",
+                    "Cuenta creada pero fallo al recuperar TipoCuenta: " + ex.getMessage());
         }
 
-        TasaInteresRespuestaDTO_IdOnly tasaDto = TasaInteresRespuestaDTO_IdOnly
-                .builder().id(guardada.getTasaInteresId()).build();
+        // 4) Validar existencia remota de Tasa de Interés
+        TasaInteresRespuestaDTO_IdOnly tasaDto;
+        try {
+            tasaDto = tasaInteresCliente.obtenerPorId(dto.getIdTasaInteres());
+        } catch (FeignException.NotFound nf) {
+            log.error("TasaInteres no existe ID={}", dto.getIdTasaInteres());
+            throw new CrearEntidadExcepcion("Cuentas",
+                    "Cuenta creada pero fallo al recuperar TasaInteres: ID no encontrado");
+        } catch (Exception ex) {
+            log.error("Error al obtener TasaInteres ID={}: {}", dto.getIdTasaInteres(), ex.getMessage());
+            throw new CrearEntidadExcepcion("Cuentas",
+                    "Cuenta creada pero fallo al recuperar TasaInteres: " + ex.getMessage());
+        }
 
         return CuentaMapper.toDto(guardada, tipoDto, tasaDto);
     }
 
     @Transactional(readOnly = true)
     public CuentaRespuestaDTO obtener(Integer id) {
-        Optional<Cuentas> opt = cuentasRepo.findById(id);
-        if (opt.isEmpty()) {
-            log.warn("No se encontró Cuenta con ID={}", id);
-            throw new EntidadNoEncontradaExcepcion("Cuentas",
-                    "No existe cuenta con ID=" + id);
-        }
-        Cuentas e = opt.get();
+        Cuentas e = cuentasRepo.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("No se encontró Cuenta ID={}", id);
+                    return new EntidadNoEncontradaExcepcion("Cuentas",
+                            "No existe cuenta con ID=" + id);
+                });
 
-        // obtener datos remotos
         TipoCuentaDTO tipoDto;
         try {
             tipoDto = tipoCuentaCliente.obtenerPorId(e.getTipoCuentaId());
         } catch (Exception ex) {
-            log.error("Error al obtener TipoCuenta remota para ID={}: {}", e.getTipoCuentaId(), ex.getMessage());
+            log.error("Error cargando TipoCuenta para ID={}: {}", id, ex.getMessage());
             throw new EntidadNoEncontradaExcepcion("Cuentas",
-                    "Cuenta encontrada pero no se pudo cargar tipoCuenta: " + ex.getMessage());
+                    "Cuenta encontrada pero fallo al cargar TipoCuenta: " + ex.getMessage());
         }
 
-        TasaInteresRespuestaDTO_IdOnly tasaDto = TasaInteresRespuestaDTO_IdOnly
-                .builder().id(e.getTasaInteresId()).build();
+        TasaInteresRespuestaDTO_IdOnly tasaDto;
+        try {
+            tasaDto = tasaInteresCliente.obtenerPorId(e.getTasaInteresId());
+        } catch (Exception ex) {
+            log.error("Error cargando TasaInteres para ID={}: {}", id, ex.getMessage());
+            throw new EntidadNoEncontradaExcepcion("Cuentas",
+                    "Cuenta encontrada pero fallo al cargar TasaInteres: " + ex.getMessage());
+        }
 
         return CuentaMapper.toDto(e, tipoDto, tasaDto);
     }
 
     @Transactional
     public CuentaRespuestaDTO actualizar(Integer id, CuentaSolicitudDTO dto) {
-        // buscar entidad
-        Optional<Cuentas> opt = cuentasRepo.findById(id);
-        if (opt.isEmpty()) {
-            log.warn("Intento de actualizar cuenta inexistente ID={}", id);
-            throw new EntidadNoEncontradaExcepcion("Cuentas",
-                    "No existe cuenta con ID=" + id);
-        }
+        Cuentas e = cuentasRepo.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Intento de actualizar Cuenta inexistente ID={}", id);
+                    return new EntidadNoEncontradaExcepcion("Cuentas",
+                            "No existe cuenta con ID=" + id);
+                });
 
-        Cuentas e = opt.get();
-        // aplicar cambios
+        // Aplicar cambios y versionar
         e.setTipoCuentaId(dto.getIdTipoCuenta());
         e.setTasaInteresId(dto.getIdTasaInteres());
         e.setCodigoCuenta(dto.getCodigoCuenta());
@@ -121,7 +158,7 @@ public class CuentaServicio {
             updated = cuentasRepo.save(e);
             log.info("Cuenta actualizada ID={}", id);
         } catch (Exception ex) {
-            log.error("Error al actualizar Cuenta ID={}: {}", id, ex.getMessage(), ex);
+            log.error("Error actualizando Cuenta ID={}: {}", id, ex.getMessage(), ex);
             throw new ActualizarEntidadExcepcion("Cuentas",
                     "Error al actualizar cuenta: " + ex.getMessage());
         }
@@ -131,13 +168,19 @@ public class CuentaServicio {
         try {
             tipoDto = tipoCuentaCliente.obtenerPorId(updated.getTipoCuentaId());
         } catch (Exception ex) {
-            log.error("Error al obtener TipoCuenta remota tras actualizar ID={}: {}", id, ex.getMessage());
+            log.error("Error cargando TipoCuenta tras actualizar ID={}: {}", id, ex.getMessage());
             throw new ActualizarEntidadExcepcion("Cuentas",
-                    "Cuenta actualizada pero fallo al cargar tipoCuenta: " + ex.getMessage());
+                    "Cuenta actualizada pero fallo al cargar TipoCuenta: " + ex.getMessage());
         }
 
-        TasaInteresRespuestaDTO_IdOnly tasaDto = TasaInteresRespuestaDTO_IdOnly
-                .builder().id(updated.getTasaInteresId()).build();
+        TasaInteresRespuestaDTO_IdOnly tasaDto;
+        try {
+            tasaDto = tasaInteresCliente.obtenerPorId(updated.getTasaInteresId());
+        } catch (Exception ex) {
+            log.error("Error cargando TasaInteres tras actualizar ID={}: {}", id, ex.getMessage());
+            throw new ActualizarEntidadExcepcion("Cuentas",
+                    "Cuenta actualizada pero fallo al cargar TasaInteres: " + ex.getMessage());
+        }
 
         return CuentaMapper.toDto(updated, tipoDto, tasaDto);
     }
