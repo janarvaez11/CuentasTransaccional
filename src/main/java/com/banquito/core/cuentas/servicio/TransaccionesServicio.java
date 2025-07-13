@@ -2,7 +2,6 @@ package com.banquito.core.cuentas.servicio;
 
 import com.banquito.core.cuentas.dto.DesembolsoRespuestaDTO;
 import com.banquito.core.cuentas.dto.DesembolsoSolicitudDTO;
-import com.banquito.core.cuentas.dto.TransaccionesRespuestaDTO;
 import com.banquito.core.cuentas.dto.TransaccionesSolicitudDTO;
 import com.banquito.core.cuentas.enums.EstadoCuentaClienteEnum;
 import com.banquito.core.cuentas.enums.EstadoTransaccionesEnum;

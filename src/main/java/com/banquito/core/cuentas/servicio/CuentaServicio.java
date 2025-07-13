@@ -15,7 +15,6 @@ import com.banquito.core.cuentas.mapper.CuentaMapper;
 import com.banquito.core.cuentas.modelo.Cuentas;
 import com.banquito.core.cuentas.repositorio.CuentasRepositorio;
 
-
 import feign.FeignException;
 
 import com.banquito.core.cuentas.enums.EstadoGeneralCuentasEnum;
@@ -23,8 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @Slf4j
@@ -43,15 +46,36 @@ public class CuentaServicio {
         this.tasaInteresCliente = tasaInteresCliente;
     }
 
+    @Transactional(readOnly = true)
+    public List<CuentaRespuestaDTO> listarTodas() {
+        List<Cuentas> cuentas = cuentasRepo.findAll();
+        List<CuentaRespuestaDTO> resultado = new ArrayList<>();
+
+        for (Cuentas cuenta : cuentas) {
+            try {
+                TipoCuentaDTO tipo = tipoCuentaCliente.obtenerPorId(cuenta.getTipoCuentaId());
+                TasaInteresRespuestaDTO_IdOnly tasa = tasaInteresCliente.obtenerPorId(cuenta.getTasaInteresId());
+                resultado.add(CuentaMapper.toDto(cuenta, tipo, tasa));
+            } catch (Exception e) {
+                log.warn("Cuenta ID={} omitida por error al cargar referencias remotas: {}", cuenta.getId(),
+                        e.getMessage());
+            }
+        }
+        return resultado;
+    }
+
     @Transactional
     public CuentaRespuestaDTO crear(CuentaSolicitudDTO dto) {
 
         // 1) Validar unicidad de código y nombre
+        /* 
         if (cuentasRepo.existsByCodigoCuenta(dto.getCodigoCuenta())) {
             log.warn("Intento de crear cuenta con código duplicado={}", dto.getCodigoCuenta());
             throw new CrearEntidadExcepcion("Cuentas",
                     "Ya existe una cuenta con código '" + dto.getCodigoCuenta() + "'");
         }
+                    */
+
         if (cuentasRepo.existsByNombre(dto.getNombre())) {
             log.warn("Intento de crear cuenta con nombre duplicado={}", dto.getNombre());
             throw new CrearEntidadExcepcion("Cuentas",
@@ -59,6 +83,21 @@ public class CuentaServicio {
         }
 
         Cuentas entity = CuentaMapper.toEntity(dto);
+
+        // Generar código único automáticamente
+        String codigoGenerado;
+        int intentos = 0;
+        do {
+            codigoGenerado = generarCodigoCuenta(dto.getIdTipoCuenta());
+            intentos++;
+            if (intentos > 5) {
+                throw new CrearEntidadExcepcion("Cuentas",
+                        "No se pudo generar un código único después de varios intentos.");
+            }
+        } while (cuentasRepo.existsByCodigoCuenta(codigoGenerado));
+
+        entity.setCodigoCuenta(codigoGenerado);
+
         Instant ahora = Instant.now();
         entity.setFechaCreacion(ahora);
         entity.setFechaModificacion(ahora);
@@ -105,7 +144,6 @@ public class CuentaServicio {
 
         return CuentaMapper.toDto(guardada, tipoDto, tasaDto);
     }
-
 
     @Transactional(readOnly = true)
     public CuentaRespuestaDTO obtener(Integer id) {
@@ -210,4 +248,11 @@ public class CuentaServicio {
                     "Error al marcar como inactiva: " + ex.getMessage());
         }
     }
+
+    private String generarCodigoCuenta(String idTipoCuenta) {
+        String prefijo = idTipoCuenta.substring(0, Math.min(3, idTipoCuenta.length())).toUpperCase();
+        String random = String.format("%06d", new Random().nextInt(1_000_000));
+        return prefijo + "-" + random;
+    }
+
 }

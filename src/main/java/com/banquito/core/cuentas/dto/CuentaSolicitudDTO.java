@@ -16,7 +16,6 @@ public class CuentaSolicitudDTO {
     @NotNull(message = "El ID de la tasa de interés es obligatorio")
     private String idTasaInteres;
 
-    @NotBlank(message = "El código de cuenta es obligatorio")
     @Size(max = 20, message = "El código de cuenta no puede exceder los 20 caracteres")
     private String codigoCuenta;
 
