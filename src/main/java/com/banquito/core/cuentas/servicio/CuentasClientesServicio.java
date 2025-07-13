@@ -15,12 +15,16 @@ import feign.FeignException;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @Slf4j
@@ -71,8 +75,7 @@ public class CuentasClientesServicio {
 
     @Transactional
     public CuentasClientes crearCuentasClientes(CuentasClientes cuentaCliente) {
-        log.info("Intentando crear nueva CuentasClientes para cliente ID: {} y número de cuenta: {}",
-                cuentaCliente.getIdCliente(), cuentaCliente.getNumeroCuenta());
+        log.info("Intentando crear nueva CuentasClientes para cliente ID: {}", cuentaCliente.getIdCliente());
 
         // 1. Validar que el cliente exista
         validarClienteExistente(cuentaCliente.getIdCliente());
@@ -80,28 +83,29 @@ public class CuentasClientesServicio {
         if (cuentaCliente.getIdCuenta() == null || cuentaCliente.getIdCuenta().getId() == null) {
             throw new CrearEntidadExcepcion("CuentasClientes", "El ID de la cuenta maestra es obligatorio.");
         }
-        Optional<Cuentas> cuentaMaestraExistente = cuentasRepositorio.findById(cuentaCliente.getIdCuenta().getId());
-        if (cuentaMaestraExistente.isEmpty()) {
-            throw new CrearEntidadExcepcion("CuentasClientes",
-                    "La cuenta maestra con ID " + cuentaCliente.getIdCuenta().getId() + " no existe.");
-        }
-        cuentaCliente.setIdCuenta(cuentaMaestraExistente.get()); // Asegurarse de que la referencia sea la entidad
-                                                                 // gestionada
+        Cuentas cuentaMaestra = cuentasRepositorio.findById(cuentaCliente.getIdCuenta().getId())
+                .orElseThrow(() -> new CrearEntidadExcepcion("CuentasClientes",
+                        "La cuenta maestra con ID " + cuentaCliente.getIdCuenta().getId() + " no existe."));
+
+        cuentaCliente.setIdCuenta(cuentaMaestra);
+
+        String numeroCuentaGenerado = generarNumeroCuentaUnico();
+        cuentaCliente.setNumeroCuenta(numeroCuentaGenerado);
 
         // 2. Validar que no exista una cuenta cliente con el mismo número de cuenta
         // para el mismo cliente
+        // Validar que no exista una cuenta duplicada
         if (cuentasClientesRepositorio
-                .findByIdClienteAndNumeroCuenta(cuentaCliente.getIdCliente(), cuentaCliente.getNumeroCuenta())
-                .isPresent()) {
-            throw new CrearEntidadExcepcion("CuentasClientes",
-                    "Ya existe una cuenta cliente con el número '" + cuentaCliente.getNumeroCuenta()
-                            + "' para el cliente con ID " + cuentaCliente.getIdCliente() + ".");
+                .findByIdClienteAndNumeroCuenta(cuentaCliente.getIdCliente(), numeroCuentaGenerado).isPresent()) {
+            throw new CrearEntidadExcepcion("CuentasClientes", "El número de cuenta ya existe para este cliente.");
         }
 
         // 3. Establecer campos por defecto/automáticos
+        cuentaCliente.setSaldoDisponible(BigDecimal.ZERO);
+        cuentaCliente.setSaldoContable(BigDecimal.ZERO);
         cuentaCliente.setFechaApertura(Instant.now());
         cuentaCliente.setEstado(EstadoCuentaClienteEnum.ACTIVO);
-        cuentaCliente.setVersion(0L); // Asumiendo versión inicial 0
+        cuentaCliente.setVersion(0L);
 
         try {
             CuentasClientes nuevaCuentaCliente = cuentasClientesRepositorio.save(cuentaCliente);
@@ -220,19 +224,35 @@ public class CuentasClientesServicio {
         }
     }
 
-    private void validarClienteExistente(String idCliente) {
-        log.debug("Validando existencia de cliente ID: {}", idCliente);
+    private void validarClienteExistente(String numeroIdentificacion) {
+        log.debug("Validando existencia de cliente con cédula: {}", numeroIdentificacion);
         try {
-            ResponseEntity<ClienteDTO> resp = clientesClient.findById(idCliente);
-            if (resp.getBody() == null) {
+            ResponseEntity<List<ClienteDTO>> resp = clientesClient.findByTipoYNumeroIdentificacion("CEDULA",
+                    numeroIdentificacion);
+
+            List<ClienteDTO> clientes = resp.getBody();
+
+            if (clientes == null || clientes.isEmpty()) {
                 throw new CrearEntidadExcepcion("CuentasClientes", "Cliente no encontrado");
             }
+
+            log.info("Cliente validado correctamente: {}", clientes.get(0).getId());
+
         } catch (FeignException.NotFound e) {
             throw new CrearEntidadExcepcion("CuentasClientes", "Cliente no encontrado");
         } catch (FeignException e) {
             log.error("Error comunicándose con clientes-service: {}", e.getMessage());
             throw new CrearEntidadExcepcion("CuentasClientes", "Error validando cliente");
         }
+    }
+
+    private String generarNumeroCuentaUnico() {
+        Random random = new Random();
+        String numero;
+        do {
+            numero = String.format("%010d", random.nextInt(1_000_000_000)); // 10 dígitos
+        } while (cuentasClientesRepositorio.findByNumeroCuenta(numero).isPresent());
+        return numero;
     }
 
 }

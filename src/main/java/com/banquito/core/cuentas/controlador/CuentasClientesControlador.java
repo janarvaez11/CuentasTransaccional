@@ -80,8 +80,8 @@ public class CuentasClientesControlador {
   @PostMapping
   public ResponseEntity<CuentasClientesRespuestaDTO> crear(
       @Parameter(description = "Payload para crear la cuenta-cliente", required = true) @Valid @RequestBody CuentasClientesSolicitudDTO dto) {
-    log.info("POST /api/v1/cuentas-clientes - crear para cliente {} con cuenta {}",
-        dto.getIdCliente(), dto.getNumeroCuenta());
+    log.info("POST /api/v1/cuentas-clientes - crear para cliente {}", dto.getIdCliente());
+
     CuentasClientes entidad = CuentasClientesMapper.toCuentasClientes(dto);
     CuentasClientes creado = service.crearCuentasClientes(entidad);
     return ResponseEntity.status(HttpStatus.CREATED)

@@ -15,6 +15,7 @@ import com.banquito.core.cuentas.mapper.CuentaMapper;
 import com.banquito.core.cuentas.modelo.Cuentas;
 import com.banquito.core.cuentas.repositorio.CuentasRepositorio;
 
+
 import feign.FeignException;
 
 import com.banquito.core.cuentas.enums.EstadoGeneralCuentasEnum;
@@ -104,6 +105,7 @@ public class CuentaServicio {
 
         return CuentaMapper.toDto(guardada, tipoDto, tasaDto);
     }
+
 
     @Transactional(readOnly = true)
     public CuentaRespuestaDTO obtener(Integer id) {

@@ -1,5 +1,7 @@
 package com.banquito.core.cuentas.mapper;
 
+import java.math.BigDecimal;
+
 import com.banquito.core.cuentas.dto.CuentaRespuestaDTO_Min2;
 import com.banquito.core.cuentas.dto.CuentasClientesRespuestaDTO;
 import com.banquito.core.cuentas.dto.CuentasClientesSolicitudDTO;
@@ -9,18 +11,19 @@ import com.banquito.core.cuentas.modelo.CuentasClientes;
 public class CuentasClientesMapper {
 
     public static CuentasClientes toCuentasClientes(CuentasClientesSolicitudDTO dto) {
-        if (dto == null) {
+        if (dto == null)
             return null;
-        }
+
         CuentasClientes entity = new CuentasClientes();
         if (dto.getIdCuenta() != null) {
             entity.setIdCuenta(new Cuentas(dto.getIdCuenta()));
         }
         entity.setIdCliente(dto.getIdCliente());
-        entity.setNumeroCuenta(dto.getNumeroCuenta());
-        entity.setSaldoDisponible(dto.getSaldoDisponible());
-        entity.setSaldoContable(dto.getSaldoContable());
-        // fechaApertura, estado y version son gestionados por el servicio/BD
+
+        // Se generan automáticamente después en el servicio:
+        entity.setSaldoDisponible(BigDecimal.ZERO);
+        entity.setSaldoContable(BigDecimal.ZERO);
+
         return entity;
     }
 
@@ -30,12 +33,11 @@ public class CuentasClientesMapper {
         }
         return CuentasClientesRespuestaDTO.builder()
                 .id(entity.getId())
-                .idCuenta(entity.getIdCuenta() != null ?
-                        CuentaRespuestaDTO_Min2.builder()
-                                .id(entity.getIdCuenta().getId())
-                                .codigoCuenta(entity.getIdCuenta().getCodigoCuenta())
-                                .nombre(entity.getIdCuenta().getNombre())
-                                .build() : null)
+                .idCuenta(entity.getIdCuenta() != null ? CuentaRespuestaDTO_Min2.builder()
+                        .id(entity.getIdCuenta().getId())
+                        .codigoCuenta(entity.getIdCuenta().getCodigoCuenta())
+                        .nombre(entity.getIdCuenta().getNombre())
+                        .build() : null)
                 .idCliente(entity.getIdCliente())
                 .numeroCuenta(entity.getNumeroCuenta())
                 .saldoDisponible(entity.getSaldoDisponible())
