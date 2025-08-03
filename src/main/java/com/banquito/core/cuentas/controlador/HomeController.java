@@ -19,7 +19,7 @@ public class HomeController {
     /// CHECK THE STATUS OF SERVER IS OK
     @GetMapping
     public ResponseEntity<String> home() {
-        return new ResponseEntity<>("Welcome to food delivery project, SERVER ✅", HttpStatus.OK);
+        return new ResponseEntity<>("Welcome to CUENTAS TRANSACTIONAL project, SERVER ✅", HttpStatus.OK);
     }
 
     /// CHECK THE STATUS OF DB IS OK
