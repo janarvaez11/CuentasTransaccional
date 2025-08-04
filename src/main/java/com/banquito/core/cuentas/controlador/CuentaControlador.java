@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/cuentas")
+@RequestMapping("/api/prestamos/v1/cuentas")
 @Tag(name = "Cuentas", description = "CRUD de cuentas bancarias")
 @Slf4j
 public class CuentaControlador {
@@ -33,7 +33,7 @@ public class CuentaControlador {
   @ApiResponse(responseCode = "200", description = "Listado exitoso")
   @GetMapping
   public ResponseEntity<List<CuentaRespuestaDTO>> listarTodas() {
-    log.info("GET /api/v1/cuentas - listar todas");
+    log.info("GET /api/prestamos/v1/cuentas - listar todas");
     return ResponseEntity.ok(servicio.listarTodas());
   }
 
@@ -45,7 +45,7 @@ public class CuentaControlador {
   @GetMapping("/{id}")
   public ResponseEntity<CuentaRespuestaDTO> obtenerPorId(
       @Parameter(description = "ID de la cuenta", required = true) @PathVariable Integer id) {
-    log.info("GET /api/v1/cuentas/{} - obtener cuenta", id);
+    log.info("GET /api/prestamos/v1/cuentas/{} - obtener cuenta", id);
     CuentaRespuestaDTO dto = servicio.obtener(id);
     return ResponseEntity.ok(dto);
   }
@@ -58,7 +58,7 @@ public class CuentaControlador {
   @PostMapping
   public ResponseEntity<CuentaRespuestaDTO> crear(
       @Parameter(description = "Datos para crear la cuenta", required = true) @Valid @RequestBody CuentaSolicitudDTO solicitud) {
-    log.info("POST /api/v1/cuentas - crear cuenta código={}", solicitud.getCodigoCuenta());
+    log.info("POST /api/prestamos/v1/cuentas - crear cuenta código={}", solicitud.getCodigoCuenta());
     CuentaRespuestaDTO creado = servicio.crear(solicitud);
     return ResponseEntity.status(201).body(creado);
   }
@@ -73,7 +73,7 @@ public class CuentaControlador {
   public ResponseEntity<CuentaRespuestaDTO> actualizar(
       @Parameter(description = "ID de la cuenta", required = true) @PathVariable Integer id,
       @Parameter(description = "Datos a actualizar", required = true) @Valid @RequestBody CuentaSolicitudDTO solicitud) {
-    log.info("PUT /api/v1/cuentas/{} - actualizar cuenta", id);
+    log.info("PUT /api/prestamos/v1/cuentas/{} - actualizar cuenta", id);
     CuentaRespuestaDTO actualizado = servicio.actualizar(id, solicitud);
     return ResponseEntity.ok(actualizado);
   }
@@ -86,7 +86,7 @@ public class CuentaControlador {
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> eliminar(
       @Parameter(description = "ID de la cuenta", required = true) @PathVariable Integer id) {
-    log.info("DELETE /api/v1/cuentas/{} - eliminar (lógico)", id);
+    log.info("DELETE /api/prestamos/v1/cuentas/{} - eliminar (lógico)", id);
     servicio.eliminar(id);
     return ResponseEntity.noContent().build();
   }

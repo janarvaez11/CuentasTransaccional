@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/transacciones")
+@RequestMapping("/api/prestamos/v1/transacciones")
 @Tag(name = "Transacciones", description = "Operaciones de depósito, retiro y transferencia")
 @Slf4j
 public class TransaccionesControlador {
@@ -45,7 +45,7 @@ public class TransaccionesControlador {
         @GetMapping("/{id}")
         public ResponseEntity<TransaccionesRespuestaDTO> getById(
                         @Parameter(description = "ID de la transacción", required = true) @PathVariable Integer id) {
-                log.info("GET /api/v1/transacciones/{} - obtener por ID", id);
+                log.info("GET /api/prestamos/v1/transacciones/{} - obtener por ID", id);
                 Transacciones t = servicio.buscarPorId(id);
                 return ResponseEntity.ok(TransaccionesMapper.toDto(t));
         }
@@ -57,7 +57,7 @@ public class TransaccionesControlador {
         @GetMapping("/por-cuenta/{idCuentaCliente}")
         public ResponseEntity<List<TransaccionesRespuestaDTO>> listarPorCuenta(
                         @Parameter(description = "ID de la cuenta cliente", required = true) @PathVariable Integer idCuentaCliente) {
-                log.info("GET /api/v1/transacciones/por-cuenta/{} - listar", idCuentaCliente);
+                log.info("GET /api/prestamos/v1/transacciones/por-cuenta/{} - listar", idCuentaCliente);
                 List<Transacciones> lista = servicio.listarPorCuenta(idCuentaCliente);
                 List<TransaccionesRespuestaDTO> dtos = lista.stream()
                                 .map(TransaccionesMapper::toDto)
@@ -75,7 +75,7 @@ public class TransaccionesControlador {
                         @Parameter(description = "ID de la cuenta cliente", required = true) @PathVariable Integer idCuentaCliente,
                         @Parameter(description = "Fecha inicio en ISO-8601", required = true) @RequestParam String fechaInicio,
                         @Parameter(description = "Fecha fin en ISO-8601", required = true) @RequestParam String fechaFin) {
-                log.info("GET /api/v1/transacciones/por-cuenta/{}/rango-fechas?fechaInicio={}&fechaFin={}",
+                log.info("GET /api/prestamos/v1/transacciones/por-cuenta/{}/rango-fechas?fechaInicio={}&fechaFin={}",
                                 idCuentaCliente, fechaInicio, fechaFin);
                 Instant start = Instant.parse(fechaInicio);
                 Instant end = Instant.parse(fechaFin);
@@ -94,7 +94,7 @@ public class TransaccionesControlador {
         @PostMapping("/deposito")
         public ResponseEntity<TransaccionesRespuestaDTO> deposito(
                         @Parameter(description = "Datos para el depósito", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
-                log.info("POST /api/v1/transacciones/deposito");
+                log.info("POST /api/prestamos/v1/transacciones/deposito");
                 dto.setTipoTransaccion(TipoTransaccionEnum.DEPOSITO);
                 Transacciones t = servicio.procesar(dto);
                 return ResponseEntity.status(HttpStatus.CREATED).body(TransaccionesMapper.toDto(t));
@@ -108,7 +108,7 @@ public class TransaccionesControlador {
         @PostMapping("/retiro")
         public ResponseEntity<TransaccionesRespuestaDTO> retiro(
                         @Parameter(description = "Datos para el retiro", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
-                log.info("POST /api/v1/transacciones/retiro");
+                log.info("POST /api/prestamos/v1/transacciones/retiro");
                 dto.setTipoTransaccion(TipoTransaccionEnum.RETIRO);
                 Transacciones t = servicio.procesar(dto);
                 return ResponseEntity.status(HttpStatus.CREATED).body(TransaccionesMapper.toDto(t));
@@ -122,7 +122,7 @@ public class TransaccionesControlador {
         @PostMapping("/transferencia")
         public ResponseEntity<TransaccionesRespuestaDTO> transferencia(
                         @Parameter(description = "Datos para la transferencia", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
-                log.info("POST /api/v1/transacciones/transferencia");
+                log.info("POST /api/prestamos/v1/transacciones/transferencia");
                 dto.setTipoTransaccion(TipoTransaccionEnum.TRANSFERENCIA);
                 Transacciones t = servicio.procesar(dto);
                 return ResponseEntity.status(HttpStatus.CREATED).body(TransaccionesMapper.toDto(t));
@@ -140,7 +140,7 @@ public class TransaccionesControlador {
         @PostMapping("/desembolso")
         public ResponseEntity<DesembolsoRespuestaDTO> desembolso(
                         @Valid @RequestBody DesembolsoSolicitudDTO dto) {
-                log.info("POST /api/v1/transacciones/desembolso → {}", dto);
+                log.info("POST /api/prestamos/v1/transacciones/desembolso → {}", dto);
                 DesembolsoRespuestaDTO resultado = servicio.procesarDesembolso(dto);
                 return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
         }
