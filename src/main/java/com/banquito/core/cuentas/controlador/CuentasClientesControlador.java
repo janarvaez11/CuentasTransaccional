@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/prestamos/v1/cuentas-clientes")
+@RequestMapping("/api/cuentas/v1/cuentas-clientes")
 @Tag(name = "CuentasClientes", description = "Operaciones sobre cuentas de clientes")
 @Slf4j
 public class CuentasClientesControlador {

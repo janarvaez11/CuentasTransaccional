@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/prestamos/v1/cuentas")
+@RequestMapping("/api/cuentas/v1/cuentas")
 @Tag(name = "Cuentas", description = "CRUD de cuentas bancarias")
 @Slf4j
 public class CuentaControlador {
