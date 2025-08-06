@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 )
 public interface TipoCuentaCliente {
 
-  @GetMapping("/api/v1/tipos-cuentas/{id}")
+  @GetMapping("/api/prestamos/v1/tipos-cuentas/{id}")
   TipoCuentaDTO obtenerPorId(@PathVariable("id") String id);
 
 }
