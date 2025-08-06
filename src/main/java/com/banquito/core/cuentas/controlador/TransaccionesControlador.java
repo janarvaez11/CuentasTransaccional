@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/transacciones")
+@RequestMapping("/api/cuentas/v1/transacciones")
 @Tag(name = "Transacciones", description = "Validación y envío de transacciones a cola")
 @Slf4j
 public class TransaccionesControlador {
@@ -45,20 +45,20 @@ public class TransaccionesControlador {
                         @Parameter(description = "Datos para el depósito. Ejemplo: {\"numeroCuentaOrigen\":\"1234567890\",\"tipoTransaccion\":\"DEPOSITO\",\"monto\":100.00,\"descripcion\":\"Depósito ATM\"}", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
                 log.info("POST /api/v1/transacciones/deposito - enviando a cola");
                 dto.setTipoTransaccion(TipoTransaccionEnum.DEPOSITO);
-                
+
                 // Validar antes de enviar a cola
                 servicio.validarTransaccion(dto);
-                
+
                 // Enviar a cola específica de depósitos
                 producer.enviarDeposito(dto);
-                
+
                 TransaccionRespuestaAsincronaDTO response = TransaccionRespuestaAsincronaDTO.builder()
-                        .mensaje("Depósito enviado para procesamiento")
-                        .transaccionId(UUID.randomUUID().toString())
-                        .estado("EN_COLA")
-                        .tipoTransaccion("DEPOSITO")
-                        .build();
-                        
+                                .mensaje("Depósito enviado para procesamiento")
+                                .transaccionId(UUID.randomUUID().toString())
+                                .estado("EN_COLA")
+                                .tipoTransaccion("DEPOSITO")
+                                .build();
+
                 return ResponseEntity.accepted().body(response);
         }
 
@@ -72,20 +72,20 @@ public class TransaccionesControlador {
                         @Parameter(description = "Datos para el retiro. Ejemplo: {\"numeroCuentaOrigen\":\"1234567890\",\"tipoTransaccion\":\"RETIRO\",\"monto\":50.00,\"descripcion\":\"Retiro ATM\"}", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
                 log.info("POST /api/v1/transacciones/retiro - enviando a cola");
                 dto.setTipoTransaccion(TipoTransaccionEnum.RETIRO);
-                
+
                 // Validar antes de enviar a cola
                 servicio.validarTransaccion(dto);
-                
+
                 // Enviar a cola específica de retiros
                 producer.enviarRetiro(dto);
-                
+
                 TransaccionRespuestaAsincronaDTO response = TransaccionRespuestaAsincronaDTO.builder()
-                        .mensaje("Retiro enviado para procesamiento")
-                        .transaccionId(UUID.randomUUID().toString())
-                        .estado("EN_COLA")
-                        .tipoTransaccion("RETIRO")
-                        .build();
-                        
+                                .mensaje("Retiro enviado para procesamiento")
+                                .transaccionId(UUID.randomUUID().toString())
+                                .estado("EN_COLA")
+                                .tipoTransaccion("RETIRO")
+                                .build();
+
                 return ResponseEntity.accepted().body(response);
         }
 
@@ -99,20 +99,20 @@ public class TransaccionesControlador {
                         @Parameter(description = "Datos para la transferencia. Ejemplo: {\"numeroCuentaOrigen\":\"1234567890\",\"numeroCuentaDestino\":\"0987654321\",\"tipoTransaccion\":\"TRANSFERENCIA\",\"monto\":25.00,\"descripcion\":\"Pago servicios\"}", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
                 log.info("POST /api/v1/transacciones/transferencia - enviando a cola");
                 dto.setTipoTransaccion(TipoTransaccionEnum.TRANSFERENCIA);
-                
+
                 // Validar antes de enviar a cola
                 servicio.validarTransaccion(dto);
-                
+
                 // Enviar a cola específica de transferencias
                 producer.enviarTransferencia(dto);
-                
+
                 TransaccionRespuestaAsincronaDTO response = TransaccionRespuestaAsincronaDTO.builder()
-                        .mensaje("Transferencia enviada para procesamiento")
-                        .transaccionId(UUID.randomUUID().toString())
-                        .estado("EN_COLA")
-                        .tipoTransaccion("TRANSFERENCIA")
-                        .build();
-                        
+                                .mensaje("Transferencia enviada para procesamiento")
+                                .transaccionId(UUID.randomUUID().toString())
+                                .estado("EN_COLA")
+                                .tipoTransaccion("TRANSFERENCIA")
+                                .build();
+
                 return ResponseEntity.accepted().body(response);
         }
 
@@ -129,19 +129,20 @@ public class TransaccionesControlador {
         public ResponseEntity<TransaccionRespuestaAsincronaDTO> procesarTransaccion(
                         @Parameter(description = "Datos de la transacción (el tipoTransaccion determina la operación). Para transferencias incluir numeroCuentaDestino", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
                 log.info("POST /api/v1/transacciones/procesar - tipo: {} - enviando a cola", dto.getTipoTransaccion());
-                
+
                 // Validar antes de enviar a cola
                 servicio.validarTransaccion(dto);
-                
+
                 // Enviar a cola
                 producer.enviarTransaccion(dto);
-                
+
                 TransaccionRespuestaAsincronaDTO response = TransaccionRespuestaAsincronaDTO.builder()
-                        .mensaje(dto.getTipoTransaccion() + " enviado para procesamiento")
-                        .transaccionId(UUID.randomUUID().toString())
-                        .estado("EN_COLA")
-                        .tipoTransaccion(dto.getTipoTransaccion().toString())
-                        .build();
-                        
+                                .mensaje(dto.getTipoTransaccion() + " enviado para procesamiento")
+                                .transaccionId(UUID.randomUUID().toString())
+                                .estado("EN_COLA")
+                                .tipoTransaccion(dto.getTipoTransaccion().toString())
+                                .build();
+
                 return ResponseEntity.accepted().body(response);
-        }}
+        }
+}
