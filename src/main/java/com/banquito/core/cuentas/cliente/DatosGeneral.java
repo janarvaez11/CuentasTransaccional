@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 )
 public interface DatosGeneral {
 
-  @GetMapping("/api/prestamos/externo/monedas/{codigoMoneda}")
+  @GetMapping("/api/general/v1/externo/monedas/{codigoMoneda}")
   ResponseEntity<DatosGeneralDTO> findById(@PathVariable("idMoneda") String idMoneda);
 
 
