@@ -144,20 +144,4 @@ public class CuentasClientesControlador {
     return ResponseEntity.ok(status);
   }
 
-  /**
-   * Health check específico del servicio de análisis
-   * Responde a: /api/analisis/health
-   * @return ResponseEntity con estado detalladoasasas
-   */
-  @GetMapping("/api/cuentas/health")
-  public ResponseEntity<Map<String, Object>> analisisHealth() {
-    Map<String, Object> status = new HashMap<>();
-    status.put("status", "UP");
-    status.put("service", "analisis");
-    status.put("version", "1.0.0");
-    status.put("timestamp", System.currentTimeMillis());
-    status.put("database", "connected");
-    return ResponseEntity.ok(status);
-  }
-
 }
