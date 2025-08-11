@@ -5,9 +5,9 @@ import time
 
 # Endpoints disponibles
 ENDPOINTS = {
-    "TRANSFERENCIA": "http://localhost:8080/api/v1/transacciones/transferencia",
-    "RETIRO": "http://localhost:8080/api/v1/transacciones/retiro",
-    "DEPOSITO": "http://localhost:8080/api/v1/transacciones/deposito"
+    "TRANSFERENCIA": "http://localhost:8080/api/cuentas/v1/transacciones/transferencia",
+    "RETIRO": "http://localhost:8080/api/cuentas/v1/transacciones/retiro",
+    "DEPOSITO": "http://localhost:8080/api/cuentas/v1/transacciones/deposito"
 }
 
 # Generar payload según tipo de transacción
@@ -51,7 +51,7 @@ def enviar_peticion(n):
 def main():
     inicio = time.time()
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-        executor.map(enviar_peticion, range(1, 51))
+        executor.map(enviar_peticion, range(1, 11))
     fin = time.time()
     print(f"\nCompletadas en {round(fin - inicio, 2)} segundos.")
 
