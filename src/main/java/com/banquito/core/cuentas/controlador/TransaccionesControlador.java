@@ -107,7 +107,7 @@ public class TransaccionesControlador {
                 producer.enviarTransferencia(dto);
 
                 TransaccionRespuestaAsincronaDTO response = TransaccionRespuestaAsincronaDTO.builder()
-                                .mensaje("Transferencia enviada para procesamiento")
+                                .mensaje("Transferencia procesada: RETIRO y DEPÓSITO enviados para procesamiento")
                                 .transaccionId(UUID.randomUUID().toString())
                                 .estado("EN_COLA")
                                 .tipoTransaccion("TRANSFERENCIA")

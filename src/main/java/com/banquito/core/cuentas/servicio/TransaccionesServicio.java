@@ -24,7 +24,7 @@ public class TransaccionesServicio {
 
     @Transactional(readOnly = true)
     public void validarTransaccion(TransaccionesSolicitudDTO dto) {
-        log.info("Validando transacción tipo: {} para cuenta: {}", 
+        log.info("Validando transacción tipo: {} para cuenta: {}",
                 dto.getTipoTransaccion(), dto.getNumeroCuentaOrigen());
 
         switch (dto.getTipoTransaccion()) {
@@ -54,7 +54,8 @@ public class TransaccionesServicio {
     private void validarActiva(CuentasClientes cc) {
         if (cc.getEstado() != EstadoCuentaClienteEnum.ACTIVO) {
             throw new CrearEntidadExcepcion(
-                    "Cuenta", "La cuenta " + cc.getNumeroCuenta() + " no está activa. Estado actual: " + cc.getEstado());
+                    "Cuenta",
+                    "La cuenta " + cc.getNumeroCuenta() + " no está activa. Estado actual: " + cc.getEstado());
         }
     }
 
@@ -67,7 +68,8 @@ public class TransaccionesServicio {
 
         // Validar monto positivo
         if (dto.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new CrearEntidadExcepcion("Monto", "El monto debe ser mayor que cero. Monto recibido: " + dto.getMonto());
+            throw new CrearEntidadExcepcion("Monto",
+                    "El monto debe ser mayor que cero. Monto recibido: " + dto.getMonto());
         }
 
         log.debug("Validación de depósito exitosa para cuenta: {}", dto.getNumeroCuentaOrigen());
@@ -80,15 +82,16 @@ public class TransaccionesServicio {
 
         // Validar monto positivo
         if (dto.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new CrearEntidadExcepcion("Monto", "El monto debe ser mayor que cero. Monto recibido: " + dto.getMonto());
+            throw new CrearEntidadExcepcion("Monto",
+                    "El monto debe ser mayor que cero. Monto recibido: " + dto.getMonto());
         }
 
         // Validar saldo suficiente
         if (cuenta.getSaldoDisponible().compareTo(dto.getMonto()) < 0) {
-            throw new CrearEntidadExcepcion("Saldo", 
-                "Saldo insuficiente en cuenta " + dto.getNumeroCuentaOrigen() + 
-                ". Saldo disponible: $" + cuenta.getSaldoDisponible() + 
-                ", Monto solicitado: $" + dto.getMonto());
+            throw new CrearEntidadExcepcion("Saldo",
+                    "Saldo insuficiente en cuenta " + dto.getNumeroCuentaOrigen() +
+                            ". Saldo disponible: $" + cuenta.getSaldoDisponible() +
+                            ", Monto solicitado: $" + dto.getMonto());
         }
 
         log.debug("Validación de retiro exitosa para cuenta: {}", dto.getNumeroCuentaOrigen());
@@ -97,7 +100,8 @@ public class TransaccionesServicio {
     private void validarTransferenciaCompleta(TransaccionesSolicitudDTO dto) {
         // Validar que se proporcionó cuenta destino
         if (dto.getNumeroCuentaDestino() == null || dto.getNumeroCuentaDestino().trim().isEmpty()) {
-            throw new CrearEntidadExcepcion("Transferencia", "Para transferencias es obligatorio especificar el número de cuenta destino");
+            throw new CrearEntidadExcepcion("Transferencia",
+                    "Para transferencias es obligatorio especificar el número de cuenta destino");
         }
 
         // Validar cuentas diferentes
@@ -115,15 +119,16 @@ public class TransaccionesServicio {
 
         // Validar monto positivo
         if (dto.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new CrearEntidadExcepcion("Monto", "El monto debe ser mayor que cero. Monto recibido: " + dto.getMonto());
+            throw new CrearEntidadExcepcion("Monto",
+                    "El monto debe ser mayor que cero. Monto recibido: " + dto.getMonto());
         }
 
         // Validar saldo suficiente en origen
         if (origen.getSaldoDisponible().compareTo(dto.getMonto()) < 0) {
-            throw new CrearEntidadExcepcion("Saldo", 
-                "Saldo insuficiente en cuenta origen " + dto.getNumeroCuentaOrigen() + 
-                ". Saldo disponible: $" + origen.getSaldoDisponible() + 
-                ", Monto solicitado: $" + dto.getMonto());
+            throw new CrearEntidadExcepcion("Saldo",
+                    "Saldo insuficiente en cuenta origen " + dto.getNumeroCuentaOrigen() +
+                            ". Saldo disponible: $" + origen.getSaldoDisponible() +
+                            ", Monto solicitado: $" + dto.getMonto());
         }
 
         log.debug("Validación de transferencia exitosa: {} -> {}",
