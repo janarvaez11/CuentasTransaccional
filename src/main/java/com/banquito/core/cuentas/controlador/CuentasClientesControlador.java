@@ -132,16 +132,5 @@ public class CuentasClientesControlador {
     return ResponseEntity.ok(CuentasClientesMapper.toCuentasClientesRespuestaDTO(activada));
   }
 
-  /**
-   * Health check endpoint para el ALB
-   * @return ResponseEntity con estado del servicio
-   */
-  @GetMapping("/health")
-  public ResponseEntity<Map<String, String>> health() {
-    Map<String, String> status = new HashMap<>();
-    status.put("status", "UP");
-    status.put("service", "analisis");
-    return ResponseEntity.ok(status);
   }
 
-}
