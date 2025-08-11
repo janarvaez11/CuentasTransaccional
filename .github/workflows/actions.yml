@@ -9,10 +9,11 @@ on:
 env:
   AWS_REGION: us-east-2
   ECR_REGISTRY: 425784381978.dkr.ecr.us-east-2.amazonaws.com
-  ECR_REPOSITORY: banquito-banco-prestamos
+  ECR_REPOSITORY: banquito-banco-cuentas
   ECS_CLUSTER: banquito-cluster
-  ECS_SERVICE: banquito-banco-prestamos
-  CONTAINER_NAME: cuentastransaccional-container
+  ECS_SERVICE: banquito-banco-cuentas
+  CONTAINER_NAME: cuentas
+  TASK_DEFINITION: banquito-banco-cuentas
 
 jobs:
   deploy:
@@ -59,9 +60,29 @@ jobs:
         echo "Pushing latest..."
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
+    - name: Install jq
+      run: sudo apt-get update && sudo apt-get install -y jq
+
+    - name: Register new ECS task definition revision
+      env:
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        echo "Describing current task definition $TASK_DEFINITION..."
+        aws ecs describe-task-definition --task-definition $TASK_DEFINITION > taskdef.json
+        echo "Preparing updated task definition with new image..."
+        IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        cat taskdef.json | jq '.taskDefinition' > td.json
+        cat td.json | jq 'del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.compatibilities,.registeredBy,.registeredAt,.inferenceAccelerators,.pidMode,.ipcMode,.proxyConfiguration,.ephemeralStorage)' > td-stripped.json
+        UPDATED=$(jq --arg IMAGE "$IMAGE_URI" --arg NAME "$CONTAINER_NAME" '.containerDefinitions = (.containerDefinitions | map(if .name == $NAME then (.image=$IMAGE) else . end))' td-stripped.json)
+        echo "$UPDATED" > td-updated.json
+        echo "Registering new task definition revision..."
+        aws ecs register-task-definition --cli-input-json file://td-updated.json | tee reg-out.json
+        NEW_TD=$(jq -r '.taskDefinition.taskDefinitionArn' reg-out.json)
+        echo "NEW_TD=$NEW_TD" >> $GITHUB_ENV
+
     - name: Update ECS service
       run: |
-        echo "Updating ECS service $ECS_SERVICE in cluster $ECS_CLUSTER..."
-        aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+        echo "Updating ECS service $ECS_SERVICE in cluster $ECS_CLUSTER to task definition $NEW_TD..."
+        aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition "$NEW_TD"
         echo "Waiting for service to stabilize..."
-        aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_SERVICE 
+        aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_SERVICE
