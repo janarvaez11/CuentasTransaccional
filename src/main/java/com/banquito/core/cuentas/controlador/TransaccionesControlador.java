@@ -43,7 +43,7 @@ public class TransaccionesControlador {
         @PostMapping("/deposito")
         public ResponseEntity<TransaccionRespuestaAsincronaDTO> deposito(
                         @Parameter(description = "Datos para el depósito. Ejemplo: {\"numeroCuentaOrigen\":\"1234567890\",\"tipoTransaccion\":\"DEPOSITO\",\"monto\":100.00,\"descripcion\":\"Depósito ATM\"}", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
-                log.info("POST /api/v1/transacciones/deposito - enviando a cola");
+                log.info("POST /api/cuentas/v1/transacciones/deposito - enviando a cola");
                 dto.setTipoTransaccion(TipoTransaccionEnum.DEPOSITO);
 
                 // Validar antes de enviar a cola
@@ -70,7 +70,7 @@ public class TransaccionesControlador {
         @PostMapping("/retiro")
         public ResponseEntity<TransaccionRespuestaAsincronaDTO> retiro(
                         @Parameter(description = "Datos para el retiro. Ejemplo: {\"numeroCuentaOrigen\":\"1234567890\",\"tipoTransaccion\":\"RETIRO\",\"monto\":50.00,\"descripcion\":\"Retiro ATM\"}", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
-                log.info("POST /api/v1/transacciones/retiro - enviando a cola");
+                log.info("POST /api/cuentas/v1/transacciones/retiro - enviando a cola");
                 dto.setTipoTransaccion(TipoTransaccionEnum.RETIRO);
 
                 // Validar antes de enviar a cola
@@ -97,7 +97,7 @@ public class TransaccionesControlador {
         @PostMapping("/transferencia")
         public ResponseEntity<TransaccionRespuestaAsincronaDTO> transferencia(
                         @Parameter(description = "Datos para la transferencia. Ejemplo: {\"numeroCuentaOrigen\":\"1234567890\",\"numeroCuentaDestino\":\"0987654321\",\"tipoTransaccion\":\"TRANSFERENCIA\",\"monto\":25.00,\"descripcion\":\"Pago servicios\"}", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
-                log.info("POST /api/v1/transacciones/transferencia - enviando a cola");
+                log.info("POST /api/cuentas/v1/transacciones/transferencia - enviando a cola");
                 dto.setTipoTransaccion(TipoTransaccionEnum.TRANSFERENCIA);
 
                 // Validar antes de enviar a cola
@@ -128,7 +128,7 @@ public class TransaccionesControlador {
         @PostMapping("/procesar")
         public ResponseEntity<TransaccionRespuestaAsincronaDTO> procesarTransaccion(
                         @Parameter(description = "Datos de la transacción (el tipoTransaccion determina la operación). Para transferencias incluir numeroCuentaDestino", required = true) @Valid @RequestBody TransaccionesSolicitudDTO dto) {
-                log.info("POST /api/v1/transacciones/procesar - tipo: {} - enviando a cola", dto.getTipoTransaccion());
+                log.info("POST /api/cuentas/v1/transacciones/procesar - tipo: {} - enviando a cola", dto.getTipoTransaccion());
 
                 // Validar antes de enviar a cola
                 servicio.validarTransaccion(dto);

@@ -39,7 +39,7 @@ public class CuentasClientesControlador {
   @GetMapping("/{id}")
   public ResponseEntity<CuentasClientesRespuestaDTO> obtenerPorId(
       @Parameter(description = "ID de la cuenta-cliente", required = true) @PathVariable Integer id) {
-    log.info("GET /api/prestamos/v1/cuentas-clientes/{} - obtener por ID", id);
+    log.info("GET /api/cuentas/v1/cuentas-clientes/{} - obtener por ID", id);
     CuentasClientes entidad = service.buscarPorId(id);
     return ResponseEntity.ok(CuentasClientesMapper.toCuentasClientesRespuestaDTO(entidad));
   }
@@ -52,7 +52,7 @@ public class CuentasClientesControlador {
   @GetMapping("/numero-cuenta/{numeroCuenta}")
   public ResponseEntity<CuentasClientesRespuestaDTO> obtenerPorNumeroCuenta(
       @Parameter(description = "Número de cuenta", required = true) @PathVariable String numeroCuenta) {
-    log.info("GET /api/prestamos/v1/cuentas-clientes/numero-cuenta/{} - obtener por número", numeroCuenta);
+    log.info("GET /api/cuentas/v1/cuentas-clientes/numero-cuenta/{} - obtener por número", numeroCuenta);
     CuentasClientes entidad = service.buscarPorNumeroCuenta(numeroCuenta);
     return ResponseEntity.ok(CuentasClientesMapper.toCuentasClientesRespuestaDTO(entidad));
   }
@@ -66,7 +66,7 @@ public class CuentasClientesControlador {
   public ResponseEntity<CuentasClientesRespuestaDTO> obtenerPorClienteYNúmero(
       @Parameter(description = "ID del cliente", required = true) @PathVariable String idCliente,
       @Parameter(description = "Número de cuenta", required = true) @PathVariable String numeroCuenta) {
-    log.info("GET /api/prestamos/v1/cuentas-clientes/cliente/{}/numero-cuenta/{} - obtener por cliente y número",
+    log.info("GET /api/cuentas/v1/cuentas-clientes/cliente/{}/numero-cuenta/{} - obtener por cliente y número",
         idCliente, numeroCuenta);
     CuentasClientes entidad = service.buscarPorIdClienteAndNumeroCuenta(idCliente, numeroCuenta);
     return ResponseEntity.ok(CuentasClientesMapper.toCuentasClientesRespuestaDTO(entidad));
@@ -80,7 +80,7 @@ public class CuentasClientesControlador {
   @PostMapping
   public ResponseEntity<CuentasClientesRespuestaDTO> crear(
       @Parameter(description = "Payload para crear la cuenta-cliente", required = true) @Valid @RequestBody CuentasClientesSolicitudDTO dto) {
-    log.info("POST /api/prestamos/v1/cuentas-clientes - crear para cliente {}", dto.getIdCliente());
+    log.info("POST /api/cuentas/v1/cuentas-clientes - crear para cliente {}", dto.getIdCliente());
 
     CuentasClientes entidad = CuentasClientesMapper.toCuentasClientes(dto);
     CuentasClientes creado = service.crearCuentasClientes(entidad);
@@ -98,7 +98,7 @@ public class CuentasClientesControlador {
   public ResponseEntity<CuentasClientesRespuestaDTO> actualizar(
       @Parameter(description = "ID de la cuenta-cliente", required = true) @PathVariable Integer id,
       @Parameter(description = "Payload con datos a actualizar", required = true) @Valid @RequestBody CuentasClientesSolicitudDTO dto) {
-    log.info("PUT /api/prestamos/v1/cuentas-clientes/{} - actualizar", id);
+    log.info("PUT /api/cuentas/v1/cuentas-clientes/{} - actualizar", id);
     CuentasClientes entidad = CuentasClientesMapper.toCuentasClientes(dto);
     CuentasClientes actualizado = service.actualizarCuentasClientes(id, entidad);
     return ResponseEntity.ok(CuentasClientesMapper.toCuentasClientesRespuestaDTO(actualizado));
@@ -112,7 +112,7 @@ public class CuentasClientesControlador {
   @PutMapping("/{id}/desactivar")
   public ResponseEntity<CuentasClientesRespuestaDTO> desactivar(
       @Parameter(description = "ID de la cuenta-cliente", required = true) @PathVariable Integer id) {
-    log.info("PUT /api/prestamos/v1/cuentas-clientes/{}/desactivar", id);
+    log.info("PUT /api/cuentas/v1/cuentas-clientes/{}/desactivar", id);
     CuentasClientes desactivada = service.desactivarCuentasClientes(id);
     return ResponseEntity.ok(CuentasClientesMapper.toCuentasClientesRespuestaDTO(desactivada));
   }
@@ -125,7 +125,7 @@ public class CuentasClientesControlador {
   @PutMapping("/{id}/activar")
   public ResponseEntity<CuentasClientesRespuestaDTO> activar(
       @Parameter(description = "ID de la cuenta-cliente", required = true) @PathVariable Integer id) {
-    log.info("PUT /api/prestamos/v1/cuentas-clientes/{}/activar", id);
+    log.info("PUT /api/cuentas/v1/cuentas-clientes/{}/activar", id);
     CuentasClientes activada = service.activarCuentasClientes(id);
     return ResponseEntity.ok(CuentasClientesMapper.toCuentasClientesRespuestaDTO(activada));
   }
