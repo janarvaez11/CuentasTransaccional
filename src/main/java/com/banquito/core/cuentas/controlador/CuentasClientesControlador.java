@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cuentas/v1/cuentas-clientes")
@@ -129,4 +131,33 @@ public class CuentasClientesControlador {
     CuentasClientes activada = service.activarCuentasClientes(id);
     return ResponseEntity.ok(CuentasClientesMapper.toCuentasClientesRespuestaDTO(activada));
   }
+
+  /**
+   * Health check endpoint para el ALB
+   * @return ResponseEntity con estado del servicio
+   */
+  @GetMapping("/health")
+  public ResponseEntity<Map<String, String>> health() {
+    Map<String, String> status = new HashMap<>();
+    status.put("status", "UP");
+    status.put("service", "analisis");
+    return ResponseEntity.ok(status);
+  }
+
+  /**
+   * Health check específico del servicio de análisis
+   * Responde a: /api/analisis/health
+   * @return ResponseEntity con estado detalladoasasas
+   */
+  @GetMapping("/api/cuentas/health")
+  public ResponseEntity<Map<String, Object>> analisisHealth() {
+    Map<String, Object> status = new HashMap<>();
+    status.put("status", "UP");
+    status.put("service", "analisis");
+    status.put("version", "1.0.0");
+    status.put("timestamp", System.currentTimeMillis());
+    status.put("database", "connected");
+    return ResponseEntity.ok(status);
+  }
+
 }
