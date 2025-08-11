@@ -1,4 +1,4 @@
-name: Deploy Prestamos Analisis to AWS
+name: Deploy cuentas transaccional to AWS
 
 on:
   push:
