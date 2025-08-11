@@ -11,9 +11,8 @@ env:
   ECR_REGISTRY: 425784381978.dkr.ecr.us-east-2.amazonaws.com
   ECR_REPOSITORY: banquito-banco-cuentas
   ECS_CLUSTER: banquito-cluster
-  ECS_SERVICE: banquito-banco-cuentas
-  CONTAINER_NAME: cuentas
-  TASK_DEFINITION: banquito-banco-cuentas
+  ECS_SERVICE: banquito-banco-prestamos
+  CONTAINER_NAME: cuentastransaccional-container
 
 jobs:
   deploy:
