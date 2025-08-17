@@ -1,5 +1,5 @@
 FROM eclipse-temurin:21-jre-jammy
-
+# comprobacion de estado
 
 WORKDIR /app
 
