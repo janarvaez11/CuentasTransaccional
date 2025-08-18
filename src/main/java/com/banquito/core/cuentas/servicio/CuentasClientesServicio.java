@@ -43,6 +43,11 @@ public class CuentasClientesServicio {
     }
 
     @Transactional(readOnly = true)
+    public List<CuentasClientes> listarPorIdCliente(String idCliente) {
+        return cuentasClientesRepositorio.findByIdCliente(idCliente);
+    }
+
+    @Transactional(readOnly = true)
     public CuentasClientes buscarPorId(Integer id) {
         log.debug("Iniciando búsqueda de CuentasClientes con ID: {}", id);
         CuentasClientes cuentaCliente = cuentasClientesRepositorio.findById(id)

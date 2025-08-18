@@ -10,7 +10,7 @@ import java.util.List;
 @FeignClient(name = "clientes-service", url = "${clientes.service.url}")
 public interface ClientesClient {
 
-    @GetMapping("/api/clientes/v1/clientes/clientes")
+    @GetMapping("/v1/clientes/clientes")
     ResponseEntity<List<ClienteDTO>> findByTipoYNumeroIdentificacion(
         @RequestParam("tipoIdentificacion") String tipoIdentificacion,
         @RequestParam("numeroIdentificacion") String numeroIdentificacion

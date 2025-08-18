@@ -18,8 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/cuentas/v1/cuentas-clientes")
@@ -32,6 +31,17 @@ public class CuentasClientesControlador {
   public CuentasClientesControlador(CuentasClientesServicio service) {
     this.service = service;
   }
+
+
+  @GetMapping("/cliente/{idCliente}")
+  public ResponseEntity<List<CuentasClientesRespuestaDTO>> listarPorCliente(@PathVariable String idCliente) {
+    var lista = service.listarPorIdCliente(idCliente).stream()
+        .map(CuentasClientesMapper::toCuentasClientesRespuestaDTO)
+        .toList();
+    return ResponseEntity.ok(lista);
+  }
+
+
 
   @Operation(summary = "Obtener cuenta-cliente por ID", description = "Devuelve los datos de la cuenta-cliente especificada por su ID")
   @ApiResponses({
@@ -132,5 +142,4 @@ public class CuentasClientesControlador {
     return ResponseEntity.ok(CuentasClientesMapper.toCuentasClientesRespuestaDTO(activada));
   }
 
-  }
-
+}
