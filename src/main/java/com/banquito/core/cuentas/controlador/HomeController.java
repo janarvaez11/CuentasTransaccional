@@ -22,6 +22,12 @@ public class HomeController {
         return new ResponseEntity<>("Welcome to CUENTAS TRANSACTIONAL project, SERVER ✅", HttpStatus.OK);
     }
 
+    /// SIMPLE HEALTHCHECK FOR ALB
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK");
+    }
+
     /// CHECK THE STATUS OF DB IS OK
     @GetMapping("/check")
     public List<Map<String, Object>> checkDB() {
