@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/cuentas/v1/transacciones")
+@RequestMapping("/v1/transacciones")
 @Tag(name = "Transacciones", description = "Validación y envío de transacciones a cola")
 @Slf4j
 public class TransaccionesControlador {

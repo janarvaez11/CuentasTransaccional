@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/cuentas/v1/cuentas-clientes")
+@RequestMapping("/v1/cuentas-clientes")
 @Tag(name = "CuentasClientes", description = "Operaciones sobre cuentas de clientes")
 @Slf4j
 public class CuentasClientesControlador {
